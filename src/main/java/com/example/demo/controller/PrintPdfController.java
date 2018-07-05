@@ -28,7 +28,7 @@ public class PrintPdfController {
     public void createPdfFromUrl(HttpServletResponse response) {
         PdfFileRequest fileRequest = new PdfFileRequest();
         fileRequest.setFileName("index.pdf");
-        fileRequest.setSourceHtmlUrl("http://blog.csdn.net/gisboygogogo/article/");
+        fileRequest.setSourceHtmlUrl("http://120.79.80.232:8080/upload/report/1530700508547.html");
  
         byte[] pdfFile = restTemplate.postForObject("http://localhost:8080/api/pdf", 
                 fileRequest, 
@@ -39,12 +39,13 @@ public class PrintPdfController {
  
     private void writePdfFileToResponse(byte[] pdfFile, String fileName, HttpServletResponse response) {
         try (InputStream in = new ByteArrayInputStream(pdfFile)) {
+            response.setHeader("content-type", "application/octet-stream");
+            response.setContentType("application/force-download");
+            response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
             OutputStream out = response.getOutputStream();
             IOUtils.copy(in, out);
             out.flush();
- 
-            response.setContentType("application/pdf");
-            response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+            response.flushBuffer();
         }
         catch (IOException ex) {
             throw new RuntimeException("Error occurred when creating PDF file", ex);
